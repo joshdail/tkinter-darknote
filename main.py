@@ -1,7 +1,8 @@
 import json
 from tkinter import *
-from tkinter import filedialog, colorchooser
+from tkinter import filedialog, colorchooser, messagebox
 from windows import set_dpi_awareness
+from pdfminer.high_level import extract_text
 
 
 THEME_FONT_MENU = ("Segoe UI", 18, "normal")
@@ -29,11 +30,12 @@ class TextEditor:
 
         self.menu = Menu(self.window)
         self.file_menu = Menu(self.menu, tearoff=0)
-        self.file_menu.add_command(label="New", command=self.clear_file, font=THEME_FONT_MENU)
-        self.file_menu.add_command(label="Open", command=self.open_file, font=THEME_FONT_MENU)
-        self.file_menu.add_command(label="Save", command=self.save_file, font=THEME_FONT_MENU)
+        self.file_menu.add_command(label="New (Ctrl+N)", command=self.clear_file, font=THEME_FONT_MENU)
+        self.file_menu.add_command(label="Open (Ctrl+O)", command=self.open_file, font=THEME_FONT_MENU)
+        self.file_menu.add_command(label="Save (Ctrl+S)", command=self.save_file, font=THEME_FONT_MENU)
+        self.file_menu.add_command(label="Extract text from PDF (Ctrl+E)", command=self.extract_from_pdf, font=THEME_FONT_MENU)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Quit", command=self.window.quit, font=THEME_FONT_MENU)
+        self.file_menu.add_command(label="Quit (Ctrl+Q)", command=self.window.quit, font=THEME_FONT_MENU)
         self.menu.add_cascade(label="File", menu=self.file_menu)
 
         self.settings_menu = Menu(self.menu, tearoff=0)
@@ -43,6 +45,13 @@ class TextEditor:
         self.menu.add_cascade(label="Settings", menu=self.settings_menu)
 
         self.window.config(menu=self.menu)
+
+        self.window.bind('<Control-n>', lambda e: self.clear_file())
+        self.window.bind('<Control-o>', lambda e: self.open_file())
+        self.window.bind('<Control-s>', lambda e: self.save_file())
+        self.window.bind('<Control-e>', lambda e: self.extract_from_pdf())
+        self.window.bind('<Control-q>', lambda e: self.window.quit())
+
         self.window.wm_protocol("WM_DELETE_WINDOW", self.on_destroy)
         self.window.mainloop()
 
@@ -78,6 +87,19 @@ class TextEditor:
             file_text = file.read()
             self.textarea.delete("1.0", "end")
             self.textarea.insert("1.0", file_text)
+            # self.textarea.config(fg=self.default_settings["font-color"])
+        self.textarea.focus()
+
+    def extract_from_pdf(self):
+        filepath = filedialog.askopenfilename()
+        if filepath.split('.')[-1] != 'pdf':
+            messagebox.showerror(title="Error", message="File selected must be of type PDF.")
+            return
+        with open(filepath, "rb") as file:
+            file_text = extract_text(file)
+            self.textarea.delete("1.0", "end")
+            self.textarea.insert("1.0", file_text)
+            # self.textarea.config(fg=self.default_settings["font-color"])
         self.textarea.focus()
 
     def save_file(self):

@@ -3,4 +3,4 @@ An editor for plain text files with customizable color settings
 
 This version of darknote is built with Tkinter. While the inital setting is a black background with light text, you can set the background color and text color. Your settings will be saved when you close the program.
 
-Currently, this program only supports viewing and editing .txt files.
+Currently, this program only supports viewing and editing .txt files. However, with this latest update, Darknote is capable of extracting text from a PDF file into a .txt file.
